@@ -78,6 +78,7 @@ def alt(months, days, years):
                     print(link['href'])
                     box_score_links.append(box_score_links)
                 print('\n\n\n')
+                time.sleep(2)
     with open('nba_box_score_links.pkl', 'wb') as fp:
         pickle.dump(box_score_links, fp)
 
