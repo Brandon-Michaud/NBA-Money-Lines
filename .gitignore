@@ -1,3 +1,6 @@
+database_helpers.py
+test_postgres.py
+test.html
+nicknames.csv
 .idea
 .DS_Store
-*.pkl
