@@ -1,6 +1,6 @@
 database_helpers.py
-test_postgres.py
-test.html
+test*
 nicknames.csv
+bbref_failed_box_score_links.pkl
 .idea
 .DS_Store

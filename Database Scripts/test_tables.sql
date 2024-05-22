@@ -5,19 +5,33 @@ INSERT INTO Games
 VALUES ('2024-05-18', 'Dallas Mavericks', 'Oklahoma City Thunder', 10, 9)
 
 SELECT *
-FROM Teams
+FROM Teams;
 
 SELECT *
-FROM Players
+FROM Players;
+
+SELECT count(*)
+FROM Games;
 
 SELECT *
-FROM Games
+FROM PlayerStats;
 
 SELECT *
-FROM PlayerStats
+FROM TeamStats;
+
+
 
 DELETE
-FROM Teams
+FROM PlayerStats;
 
 DELETE
-FROM Games
+FROM TeamStats;
+
+DELETE
+FROM Games;
+
+DELETE
+FROM Players;
+
+DELETE
+FROM Teams;
