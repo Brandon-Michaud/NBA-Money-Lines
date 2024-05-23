@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
     input_stats = ['points']
     output_stats = ['points']
-    create_dataset(input_stats, output_stats, 2, 'simple_dataset.pkl', cursor)
+    create_dataset(input_stats, output_stats, 10, 'simple_dataset.pkl', cursor)
 
     # Close the cursor and connection
     cursor.close()
