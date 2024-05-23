@@ -3,72 +3,68 @@ SELECT game_date, home_team_name, away_team_name, home_team_score, away_team_sco
 FROM Games;
 """
 
-team_points_per_game = """
-SELECT AVG(points)
-FROM (
-    SELECT points
-    FROM TeamStats
-    WHERE team_name = %s
-    AND game_date < %s
-    ORDER BY game_date DESC
-    LIMIT %s
-) as last_x_points;
+# .format(home_stat_columns, away_stat_columns)
+all_games_with_stats = """
+SELECT 
+    Games.game_date, 
+    Games.home_team_name, 
+    Games.away_team_name, 
+    {home_stat_columns},
+    {away_stat_columns}
+FROM 
+    Games
+JOIN 
+    TeamStats home_stats ON Games.game_date = home_stats.game_date AND Games.home_team_name = home_stats.team_name
+JOIN 
+    TeamStats away_stats ON Games.game_date = away_stats.game_date AND Games.away_team_name = away_stats.team_name;
 """
 
-team_points_per_game_home_away = """
-SELECT AVG(points)
-FROM (
-    SELECT points
-    FROM TeamStats
-    WHERE team_name = %s
-    AND home = %s
-    AND game_date < %s
-    ORDER BY game_date DESC
-    LIMIT %s
-) as last_x_points_home_away;
-"""
-
-team_points_conceded_per_game = """
+# .format(stat_columns, aggregate_stat_columns)
+# parameters = (team_name, include_home_games, team_name, include_away_games, game_date, window, team_name)
+team_stat_per_game = """
 WITH LastXGames AS (
-    SELECT
-           CASE
-               WHEN home_team_name = %s THEN away_team_score
-               ELSE home_team_score
-           END AS points_conceded
+    SELECT game_date
     FROM Games
-    WHERE (home_team_name = %s OR away_team_name = %s)
+    WHERE (home_team_name = %s AND %s OR away_team_name = %s AND %s)
     AND game_date < %s
     ORDER BY game_date DESC
     LIMIT %s
+),
+TeamStatsLastXGames AS (
+    SELECT {stat_columns}
+    FROM TeamStats
+    JOIN LastXGames ON TeamStats.game_date = LastXGames.game_date
+    WHERE TeamStats.team_name = %s
 )
-SELECT AVG(points_conceded)
-FROM LastXGames;
+SELECT {aggregate_stat_columns}
+FROM TeamStatsLastXGames;
 """
 
-team_points_conceded_per_game_home = """
-SELECT AVG(away_team_score)
-FROM (
-    SELECT away_team_score
+# .format(stat_columns, aggregate_stat_columns)
+# parameters = (team_name, team_name, include_home_games, team_name, include_away_games, game_date, window)
+team_stat_conceded_per_game = """
+WITH LastXGames AS (
+    SELECT game_date,
+           CASE
+               WHEN home_team_name = %s THEN away_team_name
+               ELSE home_team_name
+           END AS opponent
     FROM Games
-    WHERE home_team_name = %s
+    WHERE (home_team_name = %s AND %s OR away_team_name = %s AND %s)
     AND game_date < %s
     ORDER BY game_date DESC
     LIMIT %s
-) as last_x_points_conceded_home;
+),
+StatConceded AS (
+    SELECT {stat_columns}
+    FROM LastXGames
+    JOIN TeamStats ON LastXGames.game_date = TeamStats.game_date AND LastXGames.opponent = TeamStats.team_name
+)
+SELECT {aggregate_stat_columns}
+FROM StatConceded;
 """
 
-team_points_conceded_per_game_away = """
-SELECT AVG(home_team_score)
-FROM (
-    SELECT home_team_score
-    FROM Games
-    WHERE away_team_name = %s
-    AND game_date < %s
-    ORDER BY game_date DESC
-    LIMIT %s
-) as last_x_points_conceded_away;
-"""
-
+# (team_name, team_name, team_name, include_home_games, team_name, include_away_games, game_date, window)
 team_win_percentage = """
 WITH LastXGames AS (
     SELECT
@@ -78,49 +74,16 @@ WITH LastXGames AS (
                ELSE 0
            END AS win
     FROM Games
-    WHERE (home_team_name = %s OR away_team_name = %s)
+    WHERE (home_team_name = %s AND %s OR away_team_name = %s AND %s)
     AND game_date < %s
     ORDER BY game_date DESC
     LIMIT %s
 )
-SELECT SUM(win) * 1.0 / COUNT(*) AS winning_percentage
+SELECT SUM(win) * 1.0 / COUNT(*)
 FROM LastXGames;
 """
 
-team_win_percentage_home = """
-WITH LastXGames AS (
-    SELECT
-           CASE
-               WHEN home_team_score > away_team_score THEN 1
-               ELSE 0
-           END AS win
-    FROM Games
-    WHERE home_team_name = %s
-    AND game_date < %s
-    ORDER BY game_date DESC
-    LIMIT %s
-)
-SELECT SUM(win) * 1.0 / COUNT(*) AS winning_percentage
-FROM LastXGames;
-"""
-
-team_win_percentage_away = """
-WITH LastXGames AS (
-    SELECT
-           CASE
-               WHEN away_team_score > home_team_score THEN 1
-               ELSE 0
-           END AS win
-    FROM Games
-    WHERE away_team_name = %s
-    AND game_date < %s
-    ORDER BY game_date DESC
-    LIMIT %s
-)
-SELECT SUM(win) * 1.0 / COUNT(*) AS winning_percentage
-FROM LastXGames;
-"""
-
+# (team_name, team_name, game_date, game_date)
 team_days_since_last_game = """
 WITH LastGame AS (
     SELECT game_date
