@@ -316,7 +316,7 @@ def scrape_box_score_bbref(html, db_connection, cursor):
 
 if __name__ == '__main__':
     # Load links to box scores
-    with open('bbref_box_score_links.pkl', "rb") as fp:
+    with open('Scrapers/bbref_box_score_links.pkl', "rb") as fp:
         links = pickle.load(fp)
         n_links = len(links)
 
@@ -354,5 +354,5 @@ if __name__ == '__main__':
         db_connection.close()
 
         # Save list of links to file for later use (and reuse)
-        with open('bbref_failed_box_score_links.pkl', 'wb') as fp2:
+        with open('Scrapers/bbref_failed_box_score_links.pkl', 'wb') as fp2:
             pickle.dump(failed_links, fp2)

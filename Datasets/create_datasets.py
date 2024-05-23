@@ -108,7 +108,7 @@ def create_dataset(input_stats, output_stats, average_window, cursor,
     dataset = [inputs, outputs]
 
     # Save dataset to file
-    with open('simple_dataset.pkl', 'wb') as fp:
+    with open('Datasets/simple_dataset.pkl', 'wb') as fp:
         pickle.dump(dataset, fp)
 
 
