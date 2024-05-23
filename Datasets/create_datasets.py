@@ -4,7 +4,7 @@ from database_helpers import connection_parameters
 from dataset_queries import *
 
 
-def create_dataset(input_stats, output_stats, average_window, cursor,
+def create_dataset(input_stats, output_stats, average_window, dataset_file_name, cursor,
                    include_win_percentage=True, include_days_since_last_game=True):
     # Store the dataset in two lists
     inputs = []
@@ -101,6 +101,7 @@ def create_dataset(input_stats, output_stats, average_window, cursor,
                 days_since_last_game = days_since_last_game[0] if days_since_last_game is not None and days_since_last_game[0] is not None else 0
                 x.append(days_since_last_game)
 
+        # Add this games inputs and outputs to list of all games
         inputs.append(x)
         outputs.append(y)
 
@@ -108,7 +109,7 @@ def create_dataset(input_stats, output_stats, average_window, cursor,
     dataset = [inputs, outputs]
 
     # Save dataset to file
-    with open('Datasets/simple_dataset.pkl', 'wb') as fp:
+    with open(f'Datasets/{dataset_file_name}', 'wb') as fp:
         pickle.dump(dataset, fp)
 
 
@@ -117,9 +118,9 @@ if __name__ == '__main__':
     db_connection = psycopg2.connect(**connection_parameters)
     cursor = db_connection.cursor()
 
-    input_stats = ['points', 'total_rebounds']
-    output_stats = ['points', 'total_rebounds']
-    create_dataset(input_stats, output_stats, 2, cursor)
+    input_stats = ['points']
+    output_stats = ['points']
+    create_dataset(input_stats, output_stats, 2, 'simple_dataset.pkl', cursor)
 
     # Close the cursor and connection
     cursor.close()
