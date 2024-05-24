@@ -1,0 +1,10 @@
+--project=NBA-Box-Scores
+--exp_type=simple
+--dataset=./Datasets/simple_dataset.pkl
+--train_prop=0.7
+--val_prop=0.1
+--test_prop=0.2
+--results_path=./Results
+--epochs=10
+--lrate=0.0001
+-vv

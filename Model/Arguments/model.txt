@@ -1,0 +1,8 @@
+--hidden
+64
+32
+16
+8
+4
+--hidden_activation=elu
+--output_activation=linear
