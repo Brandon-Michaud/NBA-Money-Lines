@@ -1,0 +1,52 @@
+{
+    "os": "macOS-13.3.1-arm64-arm-64bit",
+    "python": "3.11.7",
+    "heartbeatAt": "2024-05-24T21:14:46.142903",
+    "startedAt": "2024-05-24T21:14:45.353554",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "@Model/Arguments/exp.txt",
+        "@Model/Arguments/model.txt"
+    ],
+    "state": "running",
+    "program": "/Users/brandonmichaud/Projects/NBA Money Lines/Model/base.py",
+    "codePathLocal": "Model/base.py",
+    "codePath": "Model/base.py",
+    "git": {
+        "remote": "https://github.com/Brandon-Michaud/NBA-Money-Lines.git",
+        "commit": "59629709711f10cdd06bc87c19451ad1255b81f4"
+    },
+    "email": "michaudbrandond@gmail.com",
+    "root": "/Users/brandonmichaud/Projects/NBA Money Lines",
+    "host": "Brandons-MBP-3",
+    "username": "brandonmichaud",
+    "executable": "/Users/brandonmichaud/Projects/NBA Money Lines/venv/bin/python",
+    "cpu_count": 12,
+    "cpu_count_logical": 12,
+    "cpu_freq": {
+        "current": 3504,
+        "min": 702,
+        "max": 3504
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3504,
+            "min": 702,
+            "max": 3504
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 926.3517189025879,
+            "used": 11.354724884033203
+        }
+    },
+    "gpuapple": {
+        "type": "Apple M2 Pro",
+        "vendor": "sppci_vendor_Apple"
+    },
+    "memory": {
+        "total": 32.0
+    }
+}

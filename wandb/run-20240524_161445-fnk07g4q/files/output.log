@@ -1,0 +1,23 @@
+Epoch 1/10
+[1m2167/2167[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m1s[22m 323us/step - loss: 1578.2759 - mean_absolute_error: 23.1015 - val_loss: 148.2061 - val_mean_absolute_error: 9.5184
+Epoch 2/10
+[1m2167/2167[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m1s[22m 293us/step - loss: 143.2043 - mean_absolute_error: 9.3449 - val_loss: 170.1558 - val_mean_absolute_error: 10.3611
+Epoch 3/10
+[1m   1/2167[22m [37m━━━━━━━━━━━━━━━━━━━━[39m [1m14s[22m 6ms/step - loss: 138.6489 - mean_absolute_error: 9.4830
+[1m2167/2167[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m1s[22m 309us/step - loss: 141.5066 - mean_absolute_error: 9.3615 - val_loss: 141.4553 - val_mean_absolute_error: 9.3060
+Epoch 4/10
+[1m2167/2167[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m1s[22m 293us/step - loss: 139.9847 - mean_absolute_error: 9.2864 - val_loss: 139.2939 - val_mean_absolute_error: 9.2739
+Epoch 5/10
+[1m2167/2167[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m1s[22m 293us/step - loss: 137.9608 - mean_absolute_error: 9.2837 - val_loss: 138.4580 - val_mean_absolute_error: 9.2469
+Epoch 6/10
+[1m2167/2167[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m1s[22m 297us/step - loss: 142.7329 - mean_absolute_error: 9.4168 - val_loss: 165.4614 - val_mean_absolute_error: 10.0892
+Epoch 7/10
+[1m2167/2167[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m1s[22m 307us/step - loss: 139.3514 - mean_absolute_error: 9.2953 - val_loss: 147.2819 - val_mean_absolute_error: 9.5038
+Epoch 8/10
+[1m2167/2167[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m1s[22m 293us/step - loss: 141.9381 - mean_absolute_error: 9.3252 - val_loss: 138.1250 - val_mean_absolute_error: 9.2589
+Epoch 9/10
+[1m2167/2167[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m1s[22m 296us/step - loss: 141.9683 - mean_absolute_error: 9.3248 - val_loss: 137.1902 - val_mean_absolute_error: 9.2105
+Epoch 10/10
+[1m2167/2167[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m1s[22m 299us/step - loss: 140.4279 - mean_absolute_error: 9.3021 - val_loss: 137.9714 - val_mean_absolute_error: 9.2658
+[1m620/620[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m0s[22m 211us/step - loss: 144.2089 - mean_absolute_error: 9.3810
+[1m194/194[22m [32m━━━━━━━━━━━━━━━━━━━━[39m [1m0s[22m 258us/step

@@ -1,0 +1,199 @@
+wandb_version: 1
+
+wandb:
+  desc: null
+  value: true
+project:
+  desc: null
+  value: NBA-Box-Scores
+nogo:
+  desc: null
+  value: false
+force:
+  desc: null
+  value: false
+verbose:
+  desc: null
+  value: 2
+cpus_per_task:
+  desc: null
+  value: null
+gpu:
+  desc: null
+  value: false
+exp_type:
+  desc: null
+  value: simple
+dataset:
+  desc: null
+  value: ./Datasets/simple_dataset.pkl
+train_prop:
+  desc: null
+  value: 0.7
+val_prop:
+  desc: null
+  value: 0.1
+test_prop:
+  desc: null
+  value: 0.2
+results_path:
+  desc: null
+  value: ./Results
+epochs:
+  desc: null
+  value: 10
+lrate:
+  desc: null
+  value: 0.0001
+opt:
+  desc: null
+  value: Adam
+momentum:
+  desc: null
+  value: 0.9
+decay:
+  desc: null
+  value: 0.0001
+lrd:
+  desc: null
+  value: false
+lrd_rate:
+  desc: null
+  value: 0.94
+lrd_steps:
+  desc: null
+  value: 2
+lra:
+  desc: null
+  value: false
+lra_monitor:
+  desc: null
+  value: val_loss
+lra_factor:
+  desc: null
+  value: 0.1
+lra_patience:
+  desc: null
+  value: 10
+lra_min_delta:
+  desc: null
+  value: 0.0001
+hidden:
+  desc: null
+  value:
+  - 64
+  - 32
+  - 16
+  - 8
+  - 4
+hidden_activation:
+  desc: null
+  value: elu
+batch_normalization:
+  desc: null
+  value: false
+output_activation:
+  desc: null
+  value: linear
+dropout:
+  desc: null
+  value: null
+l1:
+  desc: null
+  value: null
+l2:
+  desc: null
+  value: null
+es:
+  desc: null
+  value: false
+es_min_delta:
+  desc: null
+  value: 0.0
+es_patience:
+  desc: null
+  value: 100
+es_monitor:
+  desc: null
+  value: val_loss
+batch:
+  desc: null
+  value: 10
+prefetch:
+  desc: null
+  value: 3
+num_parallel_calls:
+  desc: null
+  value: 4
+cache:
+  desc: null
+  value: null
+shuffle:
+  desc: null
+  value: 0
+generator_seed:
+  desc: null
+  value: 42
+repeat:
+  desc: null
+  value: false
+steps_per_epoch:
+  desc: null
+  value: null
+render:
+  desc: null
+  value: false
+save_model:
+  desc: null
+  value: true
+_wandb:
+  desc: null
+  value:
+    python_version: 3.11.7
+    cli_version: 0.17.0
+    framework: keras
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1716585090
+    t:
+      1:
+      - 2
+      - 3
+      - 55
+      2:
+      - 2
+      - 3
+      - 55
+      3:
+      - 2
+      - 7
+      - 13
+      - 16
+      - 23
+      - 38
+      4: 3.11.7
+      5: 0.17.0
+      8:
+      - 4
+      - 5
+      13: darwin-arm64
+    m:
+    - 1: epoch/epoch
+      6:
+      - 3
+    - 1: epoch/loss
+      5: 1
+      6:
+      - 1
+    - 1: epoch/mean_absolute_error
+      5: 1
+      6:
+      - 1
+    - 1: epoch/val_loss
+      5: 1
+      6:
+      - 1
+    - 1: epoch/val_mean_absolute_error
+      5: 1
+      6:
+      - 1

@@ -6,5 +6,7 @@
 --test_prop=0.2
 --results_path=./Results
 --epochs=10
---lrate=0.0001
+--lrate=0.001
 -vv
+--wandb
+--save_model

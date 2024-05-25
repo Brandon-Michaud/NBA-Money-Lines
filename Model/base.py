@@ -155,18 +155,24 @@ def execute_exp(args=None, multi_gpus=False):
                                verbose=args.verbose >= 2)
     results['test_eval'] = test_eval
 
+    # Test set predictions
+    test_pred = model.predict(x_test)
+    results['x_test'] = x_test
+    results['y_test_pred'] = test_pred
+    results['y_test_real'] = y_test
+
     # Log results to Weights and Biases
     if args.wandb:
         wandb.log({'final_test_mean_squared_error': test_eval[0]})
         wandb.log({'final_test_mean_absolute_error': test_eval[1]})
 
     # Save results
-    with open("%s_results.pkl" % fbase, "wb") as fp:
+    with open("%s_model_results.pkl" % fbase, "wb") as fp:
         pickle.dump(results, fp)
 
     # Save model
     if args.save_model:
-        model.save("%s_model" % fbase)
+        model.save("%s_model.keras" % fbase)
 
     # End Weights and Biases session
     if args.wandb:

@@ -32,7 +32,7 @@ def scrape_box_score_links_bbref(months, days, years):
                 time.sleep(2)
 
     # Save list of links to file for later use (and reuse)
-    with open('Scrapers/bbref_box_score_links.pkl', 'wb') as fp:
+    with open('bbref_box_score_links.pkl', 'wb') as fp:
         pickle.dump(box_score_links, fp)
 
 

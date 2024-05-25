@@ -354,5 +354,5 @@ if __name__ == '__main__':
         db_connection.close()
 
         # Save list of links to file for later use (and reuse)
-        with open('Scrapers/bbref_failed_box_score_links.pkl', 'wb') as fp2:
+        with open('bbref_failed_box_score_links.pkl', 'wb') as fp2:
             pickle.dump(failed_links, fp2)

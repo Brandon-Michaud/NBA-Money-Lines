@@ -2,6 +2,7 @@ database_helpers.py
 test*
 nicknames.csv
 Scrapers/bbref_failed_box_score_links.pkl
+Results
 __pycache__
 .idea
 .DS_Store

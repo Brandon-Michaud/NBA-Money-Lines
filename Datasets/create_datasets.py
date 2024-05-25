@@ -5,7 +5,7 @@ from dataset_queries import *
 
 
 def create_dataset(input_stats, output_stats, average_window, dataset_file_name, cursor,
-                   include_win_percentage=True, include_days_since_last_game=True):
+                   include_win_percentage=True, include_days_since_last_game=True, games=None):
     # Store the dataset in two lists
     inputs = []
     outputs = []
@@ -17,9 +17,10 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
     output_away_stat_columns = ', '.join([f"away_stats.{stat}" for stat in output_stats])
 
     # Get all the games
-    cursor.execute(all_games_with_stats.format(home_stat_columns=output_home_stat_columns,
-                                               away_stat_columns=output_away_stat_columns))
-    games = cursor.fetchall()
+    if games is None:
+        cursor.execute(all_games_with_stats.format(home_stat_columns=output_home_stat_columns,
+                                                   away_stat_columns=output_away_stat_columns))
+        games = cursor.fetchall()
     n_games = len(games)
 
     # For each game, create data point
@@ -37,6 +38,9 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
         # Store inputs and outputs for game
         x = []
         y = [*home_team_stats, *away_team_stats]
+
+        # Flag for if there is no history of previous games available for either team,
+        no_data = False
 
         # Compute stats for both teams
         teams = [home_team_name, away_team_name]
@@ -71,14 +75,22 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
             # Convert stats to floats and handle missing data
             multiple_stats_floats = []
             for multiple_stat in multiple_stats:
-                # If data is missing replace with zeros
-                if multiple_stat is None:
-                    multiple_stats_floats.append([0.0] * len(input_stats))
+                for stat in multiple_stat:
+                    # If there is no data for stat, raise flag
+                    if stat is None:
+                        no_data = True
+                        break
 
-                # If data is present, convert to floats
-                else:
-                    for stat in multiple_stat:
-                        multiple_stats_floats.append(float(stat) if stat is not None else 0.0)
+                    # Convert stat to float if it exists
+                    multiple_stats_floats.append(float(stat))
+
+                # Stop conversion if a stat was missing
+                if no_data:
+                    break
+
+            # Stop creating data is no history of stats
+            if no_data:
+                break
 
             x.extend(multiple_stats_floats)
 
@@ -101,6 +113,10 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
                 days_since_last_game = days_since_last_game[0] if days_since_last_game is not None and days_since_last_game[0] is not None else 0
                 x.append(days_since_last_game)
 
+        # Do not include data if no history of stats
+        if no_data:
+            continue
+
         # Add this games inputs and outputs to list of all games
         inputs.append(x)
         outputs.append(y)
@@ -120,7 +136,8 @@ if __name__ == '__main__':
 
     input_stats = ['points']
     output_stats = ['points']
-    create_dataset(input_stats, output_stats, 10, 'simple_dataset.pkl', cursor)
+    games = [('2024-05-24', 'Minnesota Timberwolves', 'Dallas Mavericks') + (0,) * 2 * len(output_stats)]
+    create_dataset(input_stats, output_stats, 10, 'simple_predictions_dataset.pkl', cursor, games=games)
 
     # Close the cursor and connection
     cursor.close()
