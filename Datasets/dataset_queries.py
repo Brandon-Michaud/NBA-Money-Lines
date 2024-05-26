@@ -93,6 +93,57 @@ WITH LastGame AS (
     ORDER BY game_date DESC
     LIMIT 1
 )
-SELECT %s - game_date
+SELECT %s - game_date AS days_since_last_game
 FROM LastGame;
+"""
+
+# .format(stat_columns, aggregate_stat_columns)
+# parameters = (game_date, include_home_games, include_away_games, game_date, average_window)
+every_team_every_thing = """
+WITH RankedGames AS (
+    SELECT 
+        ROW_NUMBER() OVER (PARTITION BY G.team_name ORDER BY G.game_date DESC) AS game_rank,
+        G.team_name,
+        G.game_date,
+        {stat_columns}
+    FROM (
+        SELECT 
+            home_team_name AS team_name,
+            game_date,
+            (CASE WHEN home_team_score > away_team_score THEN 1 ELSE 0 END) AS win,
+            away_team_name AS opponent_team
+        FROM 
+            Games
+        WHERE 
+            game_date < %s
+		AND %s
+        UNION ALL
+        SELECT 
+            away_team_name AS team_name,
+            game_date,
+            (CASE WHEN away_team_score > home_team_score THEN 1 ELSE 0 END) AS win,
+            home_team_name AS opponent_team
+        FROM 
+            Games
+        WHERE 
+            game_date < %s
+		AND %s
+    ) AS G
+    JOIN TeamStats T ON G.game_date = T.game_date AND G.team_name = T.team_name
+    JOIN TeamStats O ON G.game_date = O.game_date AND G.opponent_team = O.team_name
+),
+LastXGames AS (
+    SELECT 
+        team_name,
+        {aggregate_stat_columns}
+    FROM 
+        RankedGames
+    WHERE 
+        game_rank <= %s
+    GROUP BY 
+        team_name
+)
+SELECT *
+FROM 
+    LastXGames;
 """

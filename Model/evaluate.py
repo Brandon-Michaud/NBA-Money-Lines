@@ -10,7 +10,7 @@ def load_results(results_path):
 
 
 if __name__ == '__main__':
-    results = load_results('../Results/simple_model_results.pkl')
+    results = load_results('../Results/moderate_model_results.pkl')
     x_test = results['x_test']
     y_test_pred = results['y_test_pred']
     y_test_real = results['y_test_real']
@@ -27,9 +27,9 @@ if __name__ == '__main__':
     print(f'Actual MAE: {results["test_eval"][1]}')
     print(f'Baseline MAE: {baseline_mae}')
 
-    for i in range(x_test.shape[0]):
-        print(i)
-        print(f'Input: {x_test[i]}')
-        print(f'Real: {y_test_real[i]}')
-        print(f'Pred: {y_test_pred[i]}')
-        print()
+    # for i in range(x_test.shape[0]):
+    #     print(i)
+    #     print(f'Input: {x_test[i]}')
+    #     print(f'Real: {y_test_real[i]}')
+    #     print(f'Pred: {y_test_pred[i]}')
+    #     print()
