@@ -243,12 +243,14 @@ def create_dataset_scaled(input_stats, output_stats, average_window, dataset_fil
             home_days_since_last_game = pd.read_sql_query(team_days_since_last_game,
                                                           db_connection,
                                                           params=(
-                                                          home_team_name, home_team_name, game_date, game_date)).iloc[
+                                                              home_team_name, home_team_name, game_date,
+                                                              game_date)).iloc[
                 0].to_list()
             away_days_since_last_game = pd.read_sql_query(team_days_since_last_game,
                                                           db_connection,
                                                           params=(
-                                                          away_team_name, away_team_name, game_date, game_date)).iloc[
+                                                              away_team_name, away_team_name, game_date,
+                                                              game_date)).iloc[
                 0].to_list()
         else:
             home_days_since_last_game = []
@@ -282,35 +284,36 @@ def create_dataset_scaled(input_stats, output_stats, average_window, dataset_fil
 if __name__ == '__main__':
     start_time = time.time()
     # Establish the database connection
-    db_connection = psycopg2.connect(**connection_parameters)
-    cursor = db_connection.cursor()
+    # db_connection = psycopg2.connect(**connection_parameters)
+    # cursor = db_connection.cursor()
 
-    input_stats = ['points', 'total_rebounds', 'assists', 'blocks', 'steals', 'turnovers', 'personal_fouls',
-                   'true_shooting_percentage', 'effective_field_goal_percentage', 'three_point_attempt_rate',
-                   'free_throw_rate', 'total_rebound_percentage', 'assist_percentage', 'steal_percentage',
-                   'block_percentage', 'turnover_percentage', 'offensive_rating', 'defensive_rating']
+    simple_input_stats = ['points']
+    moderate_input_stats = ['points', 'total_rebounds', 'assists', 'blocks', 'steals', 'turnovers']
+    intermediate_input_stats = ['points', 'total_rebounds', 'assists', 'blocks', 'steals', 'turnovers',
+                                'personal_fouls', 'true_shooting_percentage', 'effective_field_goal_percentage',
+                                'three_point_attempt_rate', 'free_throw_rate', 'total_rebound_percentage',
+                                'assist_percentage', 'steal_percentage', 'block_percentage', 'turnover_percentage',
+                                'offensive_rating', 'defensive_rating']
     output_stats = ['points']
     # games = [('2024-05-24', 'Minnesota Timberwolves', 'Dallas Mavericks') + (0,) * 2 * len(output_stats)]
-    create_dataset(input_stats, output_stats, 10, 'intermediate_dataset.pkl', cursor)
+    # create_dataset(simple_input_stats, output_stats, 10, 'simple_dataset.pkl', cursor)
 
     # Close the cursor and connection
-    cursor.close()
-    db_connection.close()
+    # cursor.close()
+    # db_connection.close()
 
     # Define your database connection details
-    # db_url = URL.create(
-    #     drivername="postgresql+psycopg2",
-    #     username=connection_parameters['user'],
-    #     password=connection_parameters['password'],
-    #     host=connection_parameters['host'],
-    #     port=connection_parameters['port'],
-    #     database=connection_parameters['dbname']
-    # )
+    db_url = URL.create(
+        drivername="postgresql+psycopg2",
+        username=connection_parameters['user'],
+        password=connection_parameters['password'],
+        host=connection_parameters['host'],
+        port=connection_parameters['port'],
+        database=connection_parameters['dbname']
+    )
 
     # Create a SQLAlchemy engine
-    # engine = create_engine(db_url)
-    #
-    # input_stats = ['points']
-    # output_stats = ['points']
-    # create_dataset_normalize(input_stats, output_stats, 10, 'normalized_augmented_moderate_dataset.pkl', engine,
-    #                          augment=True, days_since_last_game=True)
+    engine = create_engine(db_url)
+
+    create_dataset_scaled(intermediate_input_stats, output_stats, 10, 'intermediate_normalized_dataset.pkl', engine,
+                          augment=False, days_since_last_game=True)

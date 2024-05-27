@@ -21,10 +21,21 @@ def create_parser():
     # High-level experiment configuration
     parser.add_argument('--exp_type', type=str, default=None, help="Experiment type")
     parser.add_argument('--dataset', type=str, default='imagenet', help='Data set to use')
+    parser.add_argument('--results_path', type=str, default='./Results', help='Results directory')
+
+    # Standard training-validation-testing splits
     parser.add_argument('--train_prop', type=float, default=0.7, help='Proportion of data used for training')
     parser.add_argument('--val_prop', type=float, default=0.1, help='Proportion of data used for validation')
     parser.add_argument('--test_prop', type=float, default=0.2, help='Proportion of data used for testing')
-    parser.add_argument('--results_path', type=str, default='./Results', help='Results directory')
+
+    # K-fold cross validation
+    parser.add_argument('--kfold', action='store_true', help='Use k-fold cross validation')
+    parser.add_argument('--folds', type=int, default=10, help='Number of folds to split data into')
+    parser.add_argument('--train_folds', type=int, default=8, help='Number of folds used for training')
+    parser.add_argument('--val_folds', type=int, default=1, help='Number of folds used for validation')
+    parser.add_argument('--test_folds', type=int, default=1, help='Number of folds of data used for testing')
+    parser.add_argument('--rotation', type=int, default=0, help='Rotation for folds')
+    parser.add_argument('--random_fold_seed', type=int, default=42, help='Seed for random fold generation')
 
     # Specific experiment configuration
     parser.add_argument('--epochs', type=int, default=100, help='Training epochs')

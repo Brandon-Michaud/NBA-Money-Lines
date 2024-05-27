@@ -20,8 +20,13 @@ def generate_fname(args):
     :return: File path
     '''
     # Create file path based on experiment type and datasets
-    label = f'{args.exp_type}'
-    return label, f'{args.results_path}/{label}'
+    kfold = f'_rotation_{args.rotation}' if args.kfold else ''
+    model = '_'.join(f'{layer}' for layer in args.hidden) + f'_act_{args.hidden_activation}'
+    dropout = f'_dropout_{args.dropout}' if args.dropout is not None else ''
+    l1 = f'_dropout_{args.l1}' if args.l1 is not None else ''
+    l2 = f'_dropout_{args.l2}' if args.l2 is not None else ''
+
+    return args.exp_type, f'{args.results_path}/{args.exp_type}{kfold}_{model}_lrate_{args.lrate}{dropout}{l1}{l2}'
 
 
 def create_and_compile_model(args, n_inputs, n_outputs, train_epoch_size):
@@ -79,8 +84,14 @@ def execute_exp(args=None, multi_gpus=False):
         args.batch = args.batch * multi_gpus
 
     # Load dataset
-    x_train, y_train, x_val, y_val, x_test, y_test = load_dataset_with_splits(args.dataset, args.train_prop,
-                                                                              args.val_prop, args.test_prop)
+    if args.kfold:
+        x_train, y_train, x_val, y_val, x_test, y_test = load_dataset_with_folds(args.dataset, args.folds,
+                                                                                 args.train_folds, args.val_folds,
+                                                                                 args.test_folds, args.rotation,
+                                                                                 args.random_fold_seed)
+    else:
+        x_train, y_train, x_val, y_val, x_test, y_test = load_dataset_with_splits(args.dataset, args.train_prop,
+                                                                                  args.val_prop, args.test_prop)
 
     # Create model using the command line arguments
     if multi_gpus > 1:
