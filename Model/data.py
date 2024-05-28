@@ -50,7 +50,7 @@ def create_folds(inputs, outputs, total_folds, training_folds, validation_folds,
     return training_input, training_output, validation_input, validation_output, testing_input, testing_output
 
 
-def create_splits(inputs, outputs, training_prop, validation_prop, testing_prop):
+def create_splits(inputs, outputs, training_prop, validation_prop, testing_prop, seed=42):
     if training_prop < 0 or validation_prop < 0 or testing_prop < 0:
         raise Exception('Split proportions must be non-negative')
 
@@ -62,6 +62,7 @@ def create_splits(inputs, outputs, training_prop, validation_prop, testing_prop)
     n_validation = int(n_examples * validation_prop)
 
     indices = np.arange(n_examples)
+    np.random.seed(seed)
     np.random.shuffle(indices)
 
     training_indices = indices[:n_training]
@@ -78,9 +79,9 @@ def create_splits(inputs, outputs, training_prop, validation_prop, testing_prop)
     return training_input, training_output, validation_input, validation_output, testing_input, testing_output
 
 
-def load_dataset_with_splits(dataset_file, training_prop, validation_prop, testing_prop):
+def load_dataset_with_splits(dataset_file, training_prop, validation_prop, testing_prop, seed=42):
     inputs, outputs = load_dataset(dataset_file)
-    return create_splits(inputs, outputs, training_prop, validation_prop, testing_prop)
+    return create_splits(inputs, outputs, training_prop, validation_prop, testing_prop, seed)
 
 
 def load_dataset_with_folds(dataset_file, total_folds, training_folds, validation_folds, testing_folds, rotation, seed=42):

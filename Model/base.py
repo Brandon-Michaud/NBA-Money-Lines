@@ -25,8 +25,9 @@ def generate_fname(args):
     dropout = f'_dropout_{args.dropout}' if args.dropout is not None else ''
     l1 = f'_dropout_{args.l1}' if args.l1 is not None else ''
     l2 = f'_dropout_{args.l2}' if args.l2 is not None else ''
+    es = '_es' if args.es else ''
 
-    return args.exp_type, f'{args.results_path}/{args.exp_type}{kfold}_{model}_lrate_{args.lrate}{dropout}{l1}{l2}'
+    return f'{args.exp_type}{kfold}', f'{args.results_path}/{args.exp_type}{kfold}_{model}_lrate_{args.lrate}_epochs_{args.epochs}{es}{dropout}{l1}{l2}'
 
 
 def create_and_compile_model(args, n_inputs, n_outputs, train_epoch_size):
@@ -91,7 +92,8 @@ def execute_exp(args=None, multi_gpus=False):
                                                                                  args.random_fold_seed)
     else:
         x_train, y_train, x_val, y_val, x_test, y_test = load_dataset_with_splits(args.dataset, args.train_prop,
-                                                                                  args.val_prop, args.test_prop)
+                                                                                  args.val_prop, args.test_prop,
+                                                                                  args.random_fold_seed)
 
     # Create model using the command line arguments
     if multi_gpus > 1:
@@ -178,7 +180,7 @@ def execute_exp(args=None, multi_gpus=False):
         wandb.log({'final_test_mean_absolute_error': test_eval[1]})
 
     # Save results
-    with open("%s_model_results.pkl" % fbase, "wb") as fp:
+    with open("%s_results.pkl" % fbase, "wb") as fp:
         pickle.dump(results, fp)
 
     # Save model

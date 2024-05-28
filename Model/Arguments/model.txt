@@ -1,6 +1,6 @@
 --hidden
-256
-128
 64
+32
+16
 --hidden_activation=elu
 --output_activation=linear
