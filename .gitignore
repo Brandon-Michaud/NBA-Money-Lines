@@ -3,6 +3,8 @@ test*
 nicknames.csv
 Scrapers/bbref_failed_box_score_links.pkl
 Results
+Model/Shell\ Files
+Model/Arguments
 *.pkl
 wandb
 __pycache__
