@@ -1,4 +1,5 @@
 import pickle
+import random
 import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
@@ -6,11 +7,13 @@ from sklearn.preprocessing import StandardScaler
 import pandas as pd
 from database_helpers import connection_parameters
 from dataset_queries import *
-import time
 
 
 def create_dataset(input_stats, output_stats, average_window, dataset_file_name, cursor,
-                   include_win_percentage=True, include_days_since_last_game=True, games=None):
+                   include_home_away_splits=True, include_win_percentage=True, include_days_since_last_game=True,
+                   include_player_stats=False, player_input_stats=None, player_count_per_team=18,
+                   include_player_home_away_splits=True,
+                   games=None):
     # Store the dataset in two lists
     inputs = []
     outputs = []
@@ -20,6 +23,10 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
     input_avg_stat_columns = ", ".join([f"AVG({stat})" for stat in input_stats])
     output_home_stat_columns = ', '.join([f"home_stats.{stat}" for stat in output_stats])
     output_away_stat_columns = ', '.join([f"away_stats.{stat}" for stat in output_stats])
+
+    if include_player_stats:
+        player_input_stat_columns = ", ".join([f"ps.{stat}" for stat in player_input_stats])
+        player_avg_input_stat_columns = ", ".join([f"AVG({stat})" for stat in player_input_stats])
 
     # Get all the games
     if games is None:
@@ -56,26 +63,30 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
                            (team, True, team, True, game_date, average_window, team))
             stats_per_game = cursor.fetchone()
 
-            cursor.execute(team_stat_per_game.format(stat_columns=input_stat_columns,
-                                                     aggregate_stat_columns=input_avg_stat_columns),
-                           (team, True if j == 0 else False, team, True if j == 1 else False, game_date,
-                            average_window, team))
-            stats_per_game_home_away = cursor.fetchone()
-
             cursor.execute(team_stat_conceded_per_game.format(stat_columns=input_stat_columns,
                                                               aggregate_stat_columns=input_avg_stat_columns),
                            (team, team, True, team, True, game_date, average_window))
             stats_conceded_per_game = cursor.fetchone()
 
-            cursor.execute(team_stat_conceded_per_game.format(stat_columns=input_stat_columns,
-                                                              aggregate_stat_columns=input_avg_stat_columns),
-                           (team, team, True if j == 0 else False, team, True if j == 1 else False,
-                            game_date, average_window))
-            stats_conceded_per_game_home_away = cursor.fetchone()
+            # Get averages for all stats in home/away games
+            if include_home_away_splits:
+                cursor.execute(team_stat_per_game.format(stat_columns=input_stat_columns,
+                                                         aggregate_stat_columns=input_avg_stat_columns),
+                               (team, True if j == 0 else False, team, True if j == 1 else False, game_date,
+                                average_window, team))
+                stats_per_game_home_away = cursor.fetchone()
 
-            # Combine all results that (potentially) include multiple stats
-            multiple_stats = [stats_per_game, stats_conceded_per_game,
-                              stats_per_game_home_away, stats_conceded_per_game_home_away]
+                cursor.execute(team_stat_conceded_per_game.format(stat_columns=input_stat_columns,
+                                                                  aggregate_stat_columns=input_avg_stat_columns),
+                               (team, team, True if j == 0 else False, team, True if j == 1 else False,
+                                game_date, average_window))
+                stats_conceded_per_game_home_away = cursor.fetchone()
+
+                # Combine stats into list
+                multiple_stats = [stats_per_game, stats_conceded_per_game,
+                                  stats_per_game_home_away, stats_conceded_per_game_home_away]
+            else:
+                multiple_stats = [stats_per_game, stats_conceded_per_game]
 
             # Convert stats to floats and handle missing data
             multiple_stats_floats = []
@@ -99,7 +110,7 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
 
             x.extend(multiple_stats_floats)
 
-            # Get non-average, optional stats
+            # Get win percentage
             if include_win_percentage:
                 cursor.execute(team_win_percentage, (team, team, team, True, team, True, game_date, average_window))
                 win_percentage = cursor.fetchone()
@@ -107,20 +118,74 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
                     0] is not None else 0.0
                 x.append(win_percentage)
 
-                cursor.execute(team_win_percentage, (team, team, team, True if j == 0 else False, team,
-                                                     True if j == 1 else False, game_date, average_window))
-                win_percentage_home_away = cursor.fetchone()
-                win_percentage_home_away = float(
-                    win_percentage_home_away[0]) if win_percentage_home_away is not None and win_percentage_home_away[
-                    0] is not None else 0.0
-                x.append(win_percentage_home_away)
+                # Get win percentage home/away
+                if include_home_away_splits:
+                    cursor.execute(team_win_percentage, (team, team, team, True if j == 0 else False, team,
+                                                         True if j == 1 else False, game_date, average_window))
+                    win_percentage_home_away = cursor.fetchone()
+                    win_percentage_home_away = float(
+                        win_percentage_home_away[0]) if win_percentage_home_away is not None and \
+                                                        win_percentage_home_away[
+                                                            0] is not None else 0.0
+                    x.append(win_percentage_home_away)
 
+            # Get days since last game
             if include_days_since_last_game:
                 cursor.execute(team_days_since_last_game, (team, team, game_date, game_date))
                 days_since_last_game = cursor.fetchone()
                 days_since_last_game = days_since_last_game[0] if days_since_last_game is not None and \
                                                                   days_since_last_game[0] is not None else 0
                 x.append(days_since_last_game)
+
+            # Get player stats
+            if include_player_stats:
+                cursor.execute(players_stats_per_game.format(stat_columns=player_input_stat_columns,
+                                                             aggregate_stat_columns=player_avg_input_stat_columns),
+                               (game_date, home_team_name, away_team_name, j == 0, game_date, True, True,
+                                average_window))
+                players_stats = cursor.fetchall()
+
+                # Create a dictionary from player name to stats
+                players_stats_dict = {}
+                for players_stat in players_stats:
+                    players_stats_dict[players_stat[0]] = list(players_stat[1:])
+
+                # Add home away splits for players
+                if include_player_home_away_splits:
+                    cursor.execute(players_stats_per_game.format(stat_columns=player_input_stat_columns,
+                                                                 aggregate_stat_columns=player_avg_input_stat_columns),
+                                   (game_date, home_team_name, away_team_name, j == 0, game_date, j == 0, j == 1,
+                                    average_window))
+                    players_stats_home_away = cursor.fetchall()
+
+                    # Add home away splits to player's existing stats
+                    for players_stat_home_away in players_stats_home_away:
+                        players_stats_dict[players_stat_home_away[0]].extend(list(players_stat_home_away[1:]))
+
+                    # If a player has yet to play at home/away, pad their stats with zeros
+                    for player in players_stats_dict.keys():
+                        if len(players_stats_dict[player]) < 2 * len(player_input_stats):
+                            players_stats_dict[player].extend([0] * len(player_input_stats))
+
+                # Pad number of players with zeros to ensure uniform dimension
+                n_players = len(players_stats_dict.keys())
+                n_player_stats = len(player_input_stats)
+                for k in range(player_count_per_team - n_players):
+                    players_stats_dict[f'padding_{k}'] = (0,) * n_player_stats * (
+                        2 if include_player_home_away_splits else 1)
+
+                # Randomly shuffle players to eliminate dependence on position within players vector
+                players = list(players_stats_dict.keys())
+                random.shuffle(players)
+
+                # Convert stats to floats
+                players_stats_floats = []
+                for player in players:
+                    for stat in players_stats_dict[player]:
+                        players_stats_floats.append(float(stat))
+
+                # Add player data to input vector
+                x.extend(players_stats_floats)
 
         # Do not include data if no history of stats
         if no_data:
@@ -282,38 +347,61 @@ def create_dataset_scaled(input_stats, output_stats, average_window, dataset_fil
 
 
 if __name__ == '__main__':
-    start_time = time.time()
     # Establish the database connection
-    # db_connection = psycopg2.connect(**connection_parameters)
-    # cursor = db_connection.cursor()
+    db_connection = psycopg2.connect(**connection_parameters)
+    cursor = db_connection.cursor()
 
     simple_input_stats = ['points']
+    simple_player_input_stats = ['minutes_played', 'points']
     moderate_input_stats = ['points', 'total_rebounds', 'assists', 'blocks', 'steals', 'turnovers']
     intermediate_input_stats = ['points', 'total_rebounds', 'assists', 'blocks', 'steals', 'turnovers',
                                 'personal_fouls', 'true_shooting_percentage', 'effective_field_goal_percentage',
                                 'three_point_attempt_rate', 'free_throw_rate', 'total_rebound_percentage',
                                 'assist_percentage', 'steal_percentage', 'block_percentage', 'turnover_percentage',
                                 'offensive_rating', 'defensive_rating']
+    intermediate_2_input_stats = ['points', 'true_shooting_percentage', 'effective_field_goal_percentage',
+                                  'three_point_attempt_rate', 'free_throw_rate', 'total_rebound_percentage',
+                                  'assist_percentage', 'steal_percentage', 'block_percentage', 'turnover_percentage',
+                                  'offensive_rating', 'defensive_rating']
+    advanced_input_stats = ['points', 'true_shooting_percentage', 'effective_field_goal_percentage',
+                            'three_point_attempt_rate', 'free_throw_rate', 'total_rebound_percentage',
+                            'assist_percentage', 'steal_percentage', 'block_percentage', 'turnover_percentage',
+                            'offensive_rating', 'defensive_rating']
+    advanced_player_input_stats = ['minutes_played', 'points', 'usage_percentage', 'offensive_rating',
+                                   'defensive_rating', 'box_plus_minus']
+    complex_player_input_stats = ['minutes_played', 'points', 'total_rebounds', 'assists', 'blocks', 'steals',
+                                  'turnovers', 'personal_fouls', 'true_shooting_percentage',
+                                  'effective_field_goal_percentage', 'three_point_attempt_rate', 'free_throw_rate',
+                                  'total_rebound_percentage', 'assist_percentage', 'steal_percentage',
+                                  'block_percentage', 'turnover_percentage', 'usage_percentage', 'offensive_rating',
+                                  'defensive_rating', 'box_plus_minus']
     output_stats = ['points']
     # games = [('2024-05-24', 'Minnesota Timberwolves', 'Dallas Mavericks') + (0,) * 2 * len(output_stats)]
-    # create_dataset(simple_input_stats, output_stats, 10, 'simple_dataset.pkl', cursor)
+    # games = [('2023-10-29', 'Oklahoma City Thunder', 'Denver Nuggets', (0,) * 2 * len(output_stats))]
+    # create_dataset(intermediate_2_input_stats, output_stats, 10, 'intermediate_2_dataset.pkl', cursor,
+    #                include_win_percentage=True, include_days_since_last_game=True, include_home_away_splits=True,
+    #                include_player_stats=False)
+    create_dataset(advanced_input_stats, output_stats, 10, 'advanced_dataset.pkl', cursor,
+                   include_win_percentage=True, include_days_since_last_game=True, include_home_away_splits=True,
+                   include_player_stats=True, player_input_stats=advanced_player_input_stats, player_count_per_team=18,
+                   include_player_home_away_splits=False)
 
     # Close the cursor and connection
-    # cursor.close()
-    # db_connection.close()
+    cursor.close()
+    db_connection.close()
 
     # Define your database connection details
-    db_url = URL.create(
-        drivername="postgresql+psycopg2",
-        username=connection_parameters['user'],
-        password=connection_parameters['password'],
-        host=connection_parameters['host'],
-        port=connection_parameters['port'],
-        database=connection_parameters['dbname']
-    )
-
-    # Create a SQLAlchemy engine
-    engine = create_engine(db_url)
-
-    create_dataset_scaled(intermediate_input_stats, output_stats, 10, 'intermediate_normalized_dataset.pkl', engine,
-                          augment=False, days_since_last_game=True)
+    # db_url = URL.create(
+    #     drivername="postgresql+psycopg2",
+    #     username=connection_parameters['user'],
+    #     password=connection_parameters['password'],
+    #     host=connection_parameters['host'],
+    #     port=connection_parameters['port'],
+    #     database=connection_parameters['dbname']
+    # )
+    #
+    # # Create a SQLAlchemy engine
+    # engine = create_engine(db_url)
+    #
+    # create_dataset_scaled(intermediate_input_stats, output_stats, 10, 'intermediate_normalized_dataset.pkl', engine,
+    #                       augment=False, days_since_last_game=True)

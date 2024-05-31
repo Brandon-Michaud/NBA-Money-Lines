@@ -41,6 +41,21 @@ FROM TeamStatsLastXGames;
 """
 
 # .format(stat_columns, aggregate_stat_columns)
+# parameters = (team_name, game_date, include_home_games, include_away_games, window)
+team_stat_per_game_alt = """
+SELECT {aggregate_stat_columns}
+FROM (
+    SELECT {stat_columns}
+    FROM TeamStats
+    WHERE team_name = %s
+    AND game_date < %s
+    AND ((home = TRUE AND %s) or (home = FALSE AND %s))
+    ORDER BY game_date DESC
+    LIMIT %s
+) as LastXGames
+"""
+
+# .format(stat_columns, aggregate_stat_columns)
 # parameters = (team_name, team_name, include_home_games, team_name, include_away_games, game_date, window)
 team_stat_conceded_per_game = """
 WITH LastXGames AS (
@@ -146,4 +161,37 @@ LastXGames AS (
 SELECT *
 FROM 
     LastXGames;
+"""
+
+# .format(stat_columns, aggregate_stat_columns)
+# parameters = (game_date, home_team_name, away_team_name, players_for_home_or_away,
+#               game_date, include_home_games, include_away_games, window)
+players_stats_per_game = """
+WITH PlayersInGame AS (
+    SELECT player_name
+    FROM PlayerStats
+    WHERE game_date = %s
+    AND home_team_name = %s
+    AND away_team_name = %s
+	AND home = %s
+),
+PlayerLastXGames AS (
+    SELECT 
+        ps.player_name,
+        {stat_columns},
+        ROW_NUMBER() OVER (PARTITION BY ps.player_name ORDER BY ps.game_date DESC) AS game_rank
+    FROM PlayerStats ps
+    JOIN PlayersInGame pig ON ps.player_name = pig.player_name
+    WHERE ps.game_date < %s
+    AND ((home = TRUE AND %s) or (home = FALSE AND %s))
+)
+SELECT 
+    player_name,
+    {aggregate_stat_columns}
+FROM 
+    PlayerLastXGames
+WHERE 
+    game_rank <= %s
+GROUP BY 
+    player_name;
 """
