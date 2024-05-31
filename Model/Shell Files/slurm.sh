@@ -9,6 +9,9 @@
 #SBATCH --job-name=hw8
 #SBATCH --mail-user=brandondmichaud@ou.edu
 #SBATCH --mail-type=ALL
-#SBATCH --chdir=/home/NBA-Money-Lines
+#SBATCH --chdir=/home/cs504319/NBA-Money-Lines
+
+. /home/fagg/tf_setup.sh
+conda activate dnn_2024_02
 
 python Model/base.py @Model/Arguments/exp.txt @Model/Arguments/model.txt
