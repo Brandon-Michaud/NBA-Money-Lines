@@ -40,6 +40,7 @@ def create_parser():
     # Specific experiment configuration
     parser.add_argument('--epochs', type=int, default=100, help='Training epochs')
     parser.add_argument('--lrate', type=float, default=0.001, help="Learning rate")
+    parser.add_argument('--loss', type=str, default='mae', help='Loss function to use')
     parser.add_argument('--opt', type=str, default='Adam', help='Optimizer to use')
     parser.add_argument('--momentum', type=float, default=0.9, help='Momentum in optimizer')
     parser.add_argument('--decay', type=float, default=0.0001, help='Weight decay in optimizer')

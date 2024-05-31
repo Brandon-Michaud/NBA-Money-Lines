@@ -25,9 +25,8 @@ def generate_fname(args):
     dropout = f'_dropout_{args.dropout}' if args.dropout is not None else ''
     l1 = f'_dropout_{args.l1}' if args.l1 is not None else ''
     l2 = f'_dropout_{args.l2}' if args.l2 is not None else ''
-    es = '_es' if args.es else ''
 
-    return f'{args.exp_type}{kfold}', f'{args.results_path}/{args.exp_type}{kfold}_{model}_lrate_{args.lrate}_epochs_{args.epochs}{es}{dropout}{l1}{l2}'
+    return f'{args.exp_type}{kfold}', f'{args.results_path}/{args.exp_type}{kfold}_{model}_lrate_{args.lrate}{dropout}{l1}{l2}'
 
 
 def create_and_compile_model(args, n_inputs, n_outputs, train_epoch_size):
@@ -56,8 +55,14 @@ def create_and_compile_model(args, n_inputs, n_outputs, train_epoch_size):
         raise Exception('Unknown optimizer')
 
     # Create loss and metrics
-    loss = tf.keras.losses.MeanSquaredError()
-    metrics = [tf.keras.metrics.MeanAbsoluteError()]
+    if args.loss == 'mse':
+        loss = tf.keras.losses.MeanSquaredError()
+        metrics = [tf.keras.metrics.MeanAbsoluteError()]
+    elif args.loss == 'mae':
+        loss = tf.keras.losses.MeanAbsoluteError()
+        metrics = [tf.keras.metrics.MeanSquaredError()]
+    else:
+        raise Exception('Unknown loss')
 
     # Create model
     model = create_model(n_inputs=n_inputs,
@@ -167,12 +172,6 @@ def execute_exp(args=None, multi_gpus=False):
                                batch_size=args.batch,
                                verbose=args.verbose >= 2)
     results['test_eval'] = test_eval
-
-    # Test set predictions
-    test_pred = model.predict(x_test)
-    results['x_test'] = x_test
-    results['y_test_pred'] = test_pred
-    results['y_test_real'] = y_test
 
     # Log results to Weights and Biases
     if args.wandb:
