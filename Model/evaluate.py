@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 from sklearn.metrics import mean_absolute_error
+import scipy
 
 
 def load_results(results_path):
@@ -16,12 +17,12 @@ def load_cross_validation_results(results_path, rotations):
     return results
 
 
-def extract_maes(results):
+def extract_maes(results, idx=1):
     maes = np.empty(len(results))
     worst = -np.infty
     best = np.infty
     for i, result in enumerate(results):
-        maes[i] = result['test_eval'][1]
+        maes[i] = result['test_eval'][idx]
         if maes[i] < best:
             best = maes[i]
         if maes[i] > worst:
@@ -30,11 +31,31 @@ def extract_maes(results):
 
 
 if __name__ == '__main__':
-    results = load_cross_validation_results('../Results/moderate_rotation_{}_64_32_16_act_elu_lrate_1e-05_epochs_50_es_results.pkl', range(10))
-    maes, best_mae, worst_mae, avg_mae = extract_maes(results)
-    print(best_mae)
-    print(worst_mae)
-    print(avg_mae)
+    simple_results = load_cross_validation_results('../Results/simple_rotation_{}_16_8_4_act_elu_lrate_1e-05_results.pkl', range(10))
+    simple_maes = extract_maes(simple_results)
+
+    moderate_results = load_cross_validation_results('../Results/moderate_rotation_{}_64_32_16_act_elu_lrate_1e-05_results.pkl', range(10))
+    moderate_maes = extract_maes(moderate_results)
+
+    intermediate_results = load_cross_validation_results('../Results/intermediate_rotation_{}_256_128_64_act_elu_lrate_1e-05_results.pkl', range(10))
+    intermediate_maes = extract_maes(intermediate_results)
+
+    intermediate_2_results = load_cross_validation_results('../Results/intermediate_2_rotation_{}_128_64_32_act_elu_lrate_1e-05_results.pkl', range(10))
+    intermediate_2_maes = extract_maes(intermediate_2_results)
+
+    simple_no_splits_results = load_cross_validation_results('../Results/simple_no_splits_rotation_{}_16_8_4_act_elu_lrate_1e-05_results.pkl', range(10))
+    simple_no_splits_maes = extract_maes(simple_no_splits_results)
+
+    intermediate_no_splits_results = load_cross_validation_results('../Results/intermediate_no_splits_rotation_{}_128_64_32_act_elu_lrate_1e-05_results.pkl', range(10))
+    intermediate_no_splits_maes = extract_maes(intermediate_no_splits_results)
+
+    simple_players_results = load_cross_validation_results('../Results/simple_players_rotation_{}_256_128_64_act_elu_lrate_1e-05_results.pkl', range(10))
+    simple_players_maes = extract_maes(simple_players_results)
+
+    t_test = scipy.stats.ttest_rel(intermediate_maes[0], intermediate_2_maes[0])
+    print(f'pvalue = {t_test.pvalue}')
+    print(f'diff = {intermediate_maes[3] - intermediate_2_maes[3]}')
+
     # results = load_results('../Results/moderate_model_results.pkl')
     # x_test = results['x_test']
     # y_test_pred = results['y_test_pred']
