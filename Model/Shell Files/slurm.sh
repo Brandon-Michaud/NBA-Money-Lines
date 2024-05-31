@@ -1,12 +1,11 @@
 #!/bin/bash
 #
-#SBATCH --gres=gpu:1
-#SBATCH --partition=disc_dual_a100_students,gpu,gpu_a100
+#SBATCH --partition=disc_dual_a100_students,gpu,gpu_a100,normal
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=80G
 #SBATCH --output=outputs/%j_stdout.txt
 #SBATCH --error=outputs/%j_stderr.txt
-#SBATCH --time=06:00:00
+#SBATCH --time=00:30:00
 #SBATCH --job-name=hw8
 #SBATCH --mail-user=brandondmichaud@ou.edu
 #SBATCH --mail-type=ALL
