@@ -91,7 +91,7 @@ def load_dataset_with_folds(dataset_file, total_folds, training_folds, validatio
 
 if __name__ == '__main__':
     # x_train, y_train, x_val, y_val, x_test, y_test = load_dataset_with_splits('../Datasets/normalized_augmented_intermediate_dataset.pkl', 0.7, 0.1, 0.2)
-    x_train, y_train, x_val, y_val, x_test, y_test = load_dataset_with_folds('../Datasets/simple_dataset.pkl', 10, 8, 1, 1, 0)
+    x_train, y_train, x_val, y_val, x_test, y_test = load_dataset_with_folds('../Datasets/advanced_dataset.pkl', 10, 8, 1, 1, 0)
     # print(x_train.shape)
     # print(y_train.shape)
     # print(x_val.shape)
