@@ -23,8 +23,8 @@ def generate_fname(args):
     kfold = f'_rotation_{args.rotation}' if args.kfold else ''
     model = '_'.join(f'{layer}' for layer in args.hidden) + f'_act_{args.hidden_activation}'
     dropout = f'_dropout_{args.dropout}' if args.dropout is not None else ''
-    l1 = f'_dropout_{args.l1}' if args.l1 is not None else ''
-    l2 = f'_dropout_{args.l2}' if args.l2 is not None else ''
+    l1 = f'_L1_{args.l1}' if args.l1 is not None else ''
+    l2 = f'_L2_{args.l2}' if args.l2 is not None else ''
 
     return f'{args.exp_type}{kfold}', f'{args.results_path}/{args.exp_type}{kfold}_{model}_lrate_{args.lrate}{dropout}{l1}{l2}'
 
@@ -71,6 +71,8 @@ def create_and_compile_model(args, n_inputs, n_outputs, train_epoch_size):
                          hidden_activation=args.hidden_activation,
                          output_activation=args.output_activation,
                          dropout=args.dropout,
+                         l1=args.l1,
+                         l2=args.l2,
                          batch_normalization=args.batch_normalization)
 
     # Compile model and return
