@@ -11,7 +11,4 @@
 #SBATCH --mail-type=ALL
 #SBATCH --chdir=/home/NBA-Money-Lines
 
-. /home/fagg/tf_setup.sh
-conda activate dnn_2024_02
-
 python Model/base.py @Model/Arguments/exp.txt @Model/Arguments/model.txt
