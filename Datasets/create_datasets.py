@@ -376,8 +376,10 @@ if __name__ == '__main__':
                                   'block_percentage', 'turnover_percentage', 'usage_percentage', 'offensive_rating',
                                   'defensive_rating', 'box_plus_minus']
     output_stats = ['points']
-    # games = [('2024-05-24', 'Minnesota Timberwolves', 'Dallas Mavericks') + (0,) * 2 * len(output_stats)]
-    # games = [('2023-10-29', 'Oklahoma City Thunder', 'Denver Nuggets', (0,) * 2 * len(output_stats))]
+    # games = [('2024-06-06', 'Boston Celtics', 'Dallas Mavericks') + (0,) * 2 * len(output_stats)]
+    # create_dataset(intermediate_input_stats, output_stats, 10, 'predictions_2024-06-06.pkl', cursor,
+    #                include_win_percentage=True, include_days_since_last_game=True, include_player_home_away_splits=True,
+    #                include_player_stats=False, games=games)
     # create_dataset(intermediate_2_input_stats, output_stats, 10, 'intermediate_2_dataset.pkl', cursor,
     #                include_win_percentage=True, include_days_since_last_game=True, include_home_away_splits=True,
     #                include_player_stats=False)

@@ -21,7 +21,7 @@ def generate_fname(args):
     '''
     # Create file path based on experiment type and datasets
     kfold = f'_rotation_{args.rotation}' if args.kfold else ''
-    model = '_'.join(f'{layer}' for layer in args.hidden) + f'_act_{args.hidden_activation}'
+    model = 'layers_' + '_'.join(f'{layer}' for layer in args.hidden) + f'_act_{args.hidden_activation}'
     dropout = f'_dropout_{args.dropout}' if args.dropout is not None else ''
     l1 = f'_L1_{args.l1}' if args.l1 is not None else ''
     l2 = f'_L2_{args.l2}' if args.l2 is not None else ''
@@ -57,10 +57,10 @@ def create_and_compile_model(args, n_inputs, n_outputs, train_epoch_size):
     # Create loss and metrics
     if args.loss == 'mse':
         loss = tf.keras.losses.MeanSquaredError()
-        metrics = [tf.keras.metrics.MeanAbsoluteError()]
+        metrics = [tf.keras.metrics.MeanAbsoluteError(), tf.keras.metrics.R2Score()]
     elif args.loss == 'mae':
         loss = tf.keras.losses.MeanAbsoluteError()
-        metrics = [tf.keras.metrics.MeanSquaredError()]
+        metrics = [tf.keras.metrics.MeanSquaredError(), tf.keras.metrics.R2Score()]
     else:
         raise Exception('Unknown loss')
 
