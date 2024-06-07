@@ -95,6 +95,7 @@ def create_parser():
                         help="Number of training batches per epoch (must use --repeat if you are using this)")
 
     # Post
+    parser.add_argument('--predictions', action='store_true', default=False, help='Store test set predictions')
     parser.add_argument('--render', action='store_true', default=False, help='Write model image')
     parser.add_argument('--save_model', action='store_true', default=False, help='Save a model file')
 

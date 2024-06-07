@@ -175,6 +175,12 @@ def execute_exp(args=None, multi_gpus=False):
                                verbose=args.verbose >= 2)
     results['test_eval'] = test_eval
 
+    # Test set predictions
+    if args.predictions:
+        test_pred = model.predict(x_test)
+        results['test_pred'] = test_pred
+        results['test_real'] = y_test
+
     # Log results to Weights and Biases
     if args.wandb:
         wandb.log({'final_test_mean_squared_error': test_eval[0]})
