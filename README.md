@@ -21,9 +21,9 @@ That is what data science is all about.
 
 ## Project Structure
 This project is split into three distinct phases: 
-- Scraping, Wrangling, and Databasing
-- Dataset Creation
-- Model Building and Evaluation
+- [Scraping, Wrangling, and Databasing](#scraping-wrangling-and-databasing)
+- [Dataset Creation](#dataset-creation)
+- [Model Building and Evaluation](#model-building-and-evaluation)
 
 ### Scraping, Wrangling, and Databasing
 The stats used by this project are all scraped from Basketball Reference. 
@@ -56,7 +56,7 @@ Another problem I ran into was that box plus minus is not calculated for play-in
 I chose to ignore this error at the cost of not having play-in games in the database.
 Finally, there we some instances of Basketball Reference listing a player for two teams simultaneously when the player changed teams mid-season.
 This is a problem because I have a constraint on my tables that a player can only play in one game a day.
-Each of these cases must be handled separately and can be found at the end of the README in Appendix A.
+Each of these cases must be handled separately and can be found at the end of the README in [Appendix A](#a-failed-links-due-to-team-switch).
 
 ### Dataset Creation
 
