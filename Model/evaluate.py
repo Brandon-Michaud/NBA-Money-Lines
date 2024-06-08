@@ -3,6 +3,8 @@ import numpy as np
 from sklearn.metrics import mean_absolute_error
 from data import *
 import scipy
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def load_results(results_path):
@@ -64,17 +66,52 @@ def extract_metrics(results, mse_idx=0, mae_idx=1, r2_idx=2):
     return mses, maes, r2s
 
 
+def make_residual_plot_total(results):
+    test_real = results['test_real']
+    test_pred = results['test_pred']
+    test_real_total = np.sum(test_real, axis=1)
+    test_pred_total = np.sum(test_pred, axis=1)
+    test_residual_total = test_real_total - test_pred_total
+    plt.figure(figsize=(10, 6))
+    sns.residplot(x=test_pred_total, y=test_residual_total, lowess=True, line_kws={'color': 'red', 'lw': 1})
+    plt.axhline(0, color='gray', linestyle='--', linewidth=1)
+    plt.xlabel('Predicted Values')
+    plt.ylabel('Residuals')
+    plt.title('Residual Plot')
+    plt.show()
+
+
+def make_residual_plot_spread(results):
+    test_real = results['test_real']
+    test_pred = results['test_pred']
+    test_real_spread = test_real[:, 0] - test_real[:, 1]
+    test_pred_spread = test_pred[:, 0] - test_pred[:, 1]
+    test_residual_spread = test_real_spread - test_pred_spread
+    plt.figure(figsize=(10, 6))
+    sns.residplot(x=test_pred_spread, y=test_residual_spread, lowess=True, line_kws={'color': 'red', 'lw': 1})
+    plt.axhline(0, color='gray', linestyle='--', linewidth=1)
+    plt.xlabel('Predicted Values')
+    plt.ylabel('Residuals')
+    plt.title('Residual Plot')
+    plt.show()
+
+
 if __name__ == '__main__':
     rotations = range(10)
 
-    simple_results = load_cross_validation_results('../Results/simple_rotation_{}_layers_16_8_4_act_elu_lrate_1e-05_results.pkl', rotations)
-    simple_mses, simple_maes, simple_r2s = extract_metrics(simple_results)
+    simple_cv_results = load_cross_validation_results('../Results/simple_rotation_{}_layers_16_8_4_act_elu_lrate_1e-05_results.pkl', rotations)
+    simple_cv_mses, simple_cv_maes, simple_cv_r2s = extract_metrics(simple_cv_results)
 
-    moderate_results = load_cross_validation_results('../Results/moderate_rotation_{}_layers_64_32_16_act_elu_lrate_1e-05_results.pkl', rotations)
-    moderate_mses, moderate_maes, moderate_r2s = extract_metrics(moderate_results)
+    moderate_cv_results = load_cross_validation_results('../Results/moderate_rotation_{}_layers_64_32_16_act_elu_lrate_1e-05_results.pkl', rotations)
+    moderate_cv_mses, moderate_cv_maes, moderate_cv_r2s = extract_metrics(moderate_cv_results)
 
-    intermediate_results = load_cross_validation_results('../Results/intermediate_rotation_{}_layers_256_128_64_act_elu_lrate_1e-05_results.pkl', rotations)
-    intermediate_mses, intermediate_maes, intermediate_r2s = extract_metrics(intermediate_results)
+    intermediate_cv_results = load_cross_validation_results('../Results/intermediate_rotation_{}_layers_256_128_64_act_elu_lrate_1e-05_results.pkl', rotations)
+    intermediate_cv_mses, intermediate_cv_maes, intermediate_cv_r2s = extract_metrics(intermediate_cv_results)
+
+    intermediate_2_cv_results = load_cross_validation_results('../Results/intermediate_2_rotation_{}_layers_256_128_64_act_elu_lrate_1e-05_results.pkl', rotations)
+    intermediate_2_cv_mses, intermediate_2_cv_maes, intermediate_2_cv_r2s = extract_metrics(intermediate_2_cv_results)
+
+    make_residual_plot_spread(intermediate_2_cv_results[0])
 
     # intermediate_no_splits_results = load_cross_validation_results('../Results/intermediate_no_splits_rotation_{}_128_64_32_act_elu_lrate_1e-05_results.pkl', rotations)
     # intermediate_no_splits_maes = extract_maes(intermediate_no_splits_results)
@@ -82,9 +119,9 @@ if __name__ == '__main__':
     # simple_players_results = load_cross_validation_results('../Results/simple_players_rotation_{}_256_128_64_act_elu_lrate_1e-05_results.pkl', rotations)
     # simple_players_maes = extract_maes(simple_players_results)
 
-    t_test = scipy.stats.ttest_rel(simple_maes[0], intermediate_maes[0])
-    print(f'pvalue = {t_test.pvalue}')
-    print(f'diff = {simple_maes[3] - intermediate_maes[3]}')
+    # t_test = scipy.stats.ttest_rel(intermediate_2_cv_maes[0], intermediate_cv_maes[0])
+    # print(f'pvalue = {t_test.pvalue}')
+    # print(f'diff = {intermediate_2_cv_maes[3] - intermediate_cv_maes[3]}')
 
     # results = load_results('../Results/moderate_model_results.pkl')
     # x_test = results['x_test']
@@ -102,17 +139,3 @@ if __name__ == '__main__':
     # baseline_mae = (home_baseline_mae + away_baseline_mae) / 2
     # print(f'Actual MAE: {results["test_eval"][1]}')
     # print(f'Baseline MAE: {baseline_mae}')
-
-    # for i in range(x_test.shape[0]):
-    #     print(i)
-    #     print(f'Input: {x_test[i]}')
-    #     print(f'Real: {y_test_real[i]}')
-    #     print(f'Pred: {y_test_pred[i]}')
-    #     print()
-    # 8.705896377563477
-    # 8.977946281433105
-    # 8.842391681671142
-    #
-    # 8.979540824890137
-    # 9.328161239624023
-    # 9.127171802520753
