@@ -27,13 +27,15 @@ This project is split into three distinct phases:
 
 ### Scraping, Wrangling, and Databasing
 The stats used by this project are all scraped from Basketball Reference. 
-I chose to scrape games beginning in 2000, but this can changed as long as all of the basic and advanced box score stats are available for every game.
+I chose to scrape games beginning in 2000, but this can changed as long as all the basic and advanced box score stats are available for every game.
 All scrapers are stored in the `/Scrapers` directory.
 First, links to box scores are scraped for each day of the year using `scrape_box_score_links.py`. 
 This process takes around 5-6 hours because of IP rate limiting of 30 requests per second.
 
-Next, I set up a database to store all of the box score information. 
-The code assumes you use a PostgreSQL database. Any other type of database will not work.
+Next, I set up a database to store all the box score information. 
+My code assumes you use a PostgreSQL database. Any other type of database will not work.
+My code also assumes you store the connection parameters to your database in a file named `database_helpers.py`.
+The expected structure of these parameters can be found in [Appendix A](#a-postgresql-connection-parameter-dictionary-structure).
 All database scripts are stored in the `/Database Scripts` directory. 
 The scripts to create the tables can be found in `create_tables.sql`.
 I want to note here that my database design is not ideal, but my focus was on getting something working.
@@ -56,14 +58,25 @@ Another problem I ran into was that box plus minus is not calculated for play-in
 I chose to ignore this error at the cost of not having play-in games in the database.
 Finally, there we some instances of Basketball Reference listing a player for two teams simultaneously when the player changed teams mid-season.
 This is a problem because I have a constraint on my tables that a player can only play in one game a day.
-Each of these cases must be handled separately and can be found at the end of the README in [Appendix A](#a-failed-links-due-to-team-switch).
+Each of these cases must be handled separately and can be found at the end of the README in [Appendix B](#b-failed-links-due-to-team-switch).
 
 ### Dataset Creation
 
 ### Model Building and Evaluation
 
 ## Appendix
-### A: Failed Links Due to Team Switch
+### A: PostgreSQL Connection Parameter Dictionary Structure
+connection_parameters = {\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'dbname': 'your-db-name',\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'user': 'your-db-username',\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'password': 'your-db-password',\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'host': 'your-db-host',\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'port': 'your-db-port'\
+}
+
+The default username is postgres, default host is localhost, and default port is 5432.
+
+### B: Failed Links Due to Team Switch
 - /boxscores/200101030PHI.html
   - Jim Jackson, Anthony Johnson, and Larry Robinson are listed for both Cavs and Hawks
   - Ensure only Cavs game counts (they were traded)
