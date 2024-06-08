@@ -314,9 +314,10 @@ def scrape_box_score_bbref(html, db_connection, cursor):
     insert_team_stats(db_connection, cursor, team_stats)
 
 
-if __name__ == '__main__':
+# Scrape multiple box scores from basketball reference
+def scrape_box_scores_bbref(links_filename, db_connection, cursor, failed_links_filename):
     # Load links to box scores
-    with open('Scrapers/bbref_box_score_links.pkl', "rb") as fp:
+    with open(links_filename, "rb") as fp:
         links = pickle.load(fp)
         n_links = len(links)
 
@@ -325,10 +326,6 @@ if __name__ == '__main__':
 
         # Store failed box score links
         failed_links = {}
-
-        # Establish the database connection
-        db_connection = psycopg2.connect(**connection_parameters)
-        cursor = db_connection.cursor()
 
         # Scrape box score from each link
         for i, link in enumerate(links):
@@ -349,10 +346,19 @@ if __name__ == '__main__':
             # Sleep for 2 seconds to ensure <= 30 requests per minute (required by bbref)
             time.sleep(2)
 
-        # Close the cursor and connection
-        cursor.close()
-        db_connection.close()
-
         # Save list of links to file for later use (and reuse)
-        with open('bbref_failed_box_score_links.pkl', 'wb') as fp2:
+        with open(failed_links_filename, 'wb') as fp2:
             pickle.dump(failed_links, fp2)
+
+
+if __name__ == '__main__':
+    # Establish the database connection
+    db_connection = psycopg2.connect(**connection_parameters)
+    cursor = db_connection.cursor()
+
+    # Scrape all the box scores
+    scrape_box_scores_bbref('Scrapers/bbref_box_score_links.pkl', db_connection, cursor, 'bbref_failed_box_score_links.pkl')
+
+    # Close the cursor and connection
+    cursor.close()
+    db_connection.close()

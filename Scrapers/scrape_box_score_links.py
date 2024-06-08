@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def scrape_box_score_links_bbref(months, days, years):
+def scrape_box_score_links_bbref(months, days, years, filename):
     # Template URL for link pages
     bbref_url = 'https://www.basketball-reference.com/boxscores/?month={month}&day={day}&year={year}'
 
@@ -32,7 +32,7 @@ def scrape_box_score_links_bbref(months, days, years):
                 time.sleep(2)
 
     # Save list of links to file for later use (and reuse)
-    with open('bbref_box_score_links.pkl', 'wb') as fp:
+    with open(filename, 'wb') as fp:
         pickle.dump(box_score_links, fp)
 
 
@@ -40,4 +40,4 @@ if __name__ == '__main__':
     months = range(1, 13)
     days = range(1, 32)
     years = range(2000, 2025)
-    scrape_box_score_links_bbref(months, days, years)
+    scrape_box_score_links_bbref(months, days, years, 'bbref_box_score_links.pkl')
