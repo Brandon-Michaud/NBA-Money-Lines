@@ -189,12 +189,6 @@ def make_player_dictionaries(tables, sql_date_str, away_team, home_team, home):
 
             # If the player played, add his stats to the dictionary
             if len(stats) > 1:
-                stats = row.find_all('td')
-
-                # If the player did not play for any reason other than a coach's decision, do not include him
-                if len(stats) == 1:
-                    continue
-
                 # Get stats, filling missing columns with zeros
                 row_data = list(cell.get_text() if cell.get_text() != '' else 0 for cell in stats)
 
@@ -238,7 +232,7 @@ def make_player_dictionaries(tables, sql_date_str, away_team, home_team, home):
             # Remove redundant minutes played
             del player_stats[key][player_minutes_played_index_redundant]
 
-            # Convert minutes played to floatvmi
+            # Convert minutes played to float
             if isinstance(player_stats[key][player_minutes_played_index], str):
                 minutes, seconds = map(int, player_stats[key][player_minutes_played_index].split(':'))
                 total_minutes = minutes + seconds / 60
