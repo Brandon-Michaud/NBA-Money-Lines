@@ -178,6 +178,7 @@ def execute_exp(args=None, multi_gpus=False):
     # Test set predictions
     if args.predictions:
         test_pred = model.predict(x_test)
+        results['test_input'] = x_test
         results['test_pred'] = test_pred
         results['test_real'] = y_test
 
