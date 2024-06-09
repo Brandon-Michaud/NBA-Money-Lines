@@ -61,8 +61,33 @@ This is a problem because I have a constraint on my tables that a player can onl
 Each of these cases must be handled separately and can be found at the end of the README in [Appendix B](#b-failed-links-due-to-team-switch).
 
 ### Dataset Creation
+The next phase in this project makes datasets to train models using the scraped data stored in the database.
+The code and datatsets for this phase are stored in the `/Datasets` directory.
+There are a practically infinite different number of datasets that could be created from the scraped data.
+I have chosen a handful of sets of different input features that I have found to provide useful insights into which predictors provide the most value and how complexity impacts performance.
+The input features for each level of complexity can be found in the `create_datasets.py` file. 
+I encourage you to test your own sets of input features and see how they compare.
+I chose to use a rolling 10 game average for each input feature for each dataset.
+This window can be changed, but I found the best success with 10 games for the window lengths I tested.
 
 ### Model Building and Evaluation
+The last step builds neural network models using TensorFlow and trains them using the datasets created in the previous phase.
+All code for models is stored in the `/Model` directory.
+The code that actually constructs the model is in `model.py` and builds a simple sequential fully-connected neural network.
+The code that loads the dataset and splits into training, validation, and testing sets is located in `data.py`.
+The `base.py` file is the file that actually runs the experiment.
+It handles loading the dataset with splits, building the model, training the model, and saving test set results.
+It accepts command line arguments that handle everything about the experiment, including file locations for the dataset and results, as well as model architecture specification.
+The command line argument parser is defined in `parser.py`.
+For a list of every command line option and what its function is, run the command `python Model/base.py --help`.
+These command line arguments can also be specified in a .txt file that is referenced in the command line with an @ prefix.
+A sample set of command line arguments is provided in [Appendix C](#c-sample-command-line-arguments).
+The `evaluate.py` file loads saved model results and evaluates them in a number of ways, including statistical significance tests and residual plots.
+The `predict.py` file loads a saved model and uses it to predict the score of game or list of games.
+I did not save every set of arguments for every experiment I ran because there were just too many.
+You can find the summary of experiments and findings in [My Results](#my-results)
+
+## My Results
 
 ## Appendix
 ### A: PostgreSQL Connection Parameter Dictionary Structure
@@ -120,3 +145,35 @@ The default username is postgres, default host is localhost, and default port is
 - /boxscores/200902230SAC.html
   - Chris Wilcox is listed for both Knicks and Hornets
   - Ensure only Knicks game counts (he never played for NOH)
+
+### C: Sample Command Line Arguments
+`python Model/base.py @exp.txt @model.txt`
+
+#### exp.txt
+--project=NBA-Box-Scores\
+--exp_type=intermediate_2\
+--dataset=./Datasets/intermediate_dataset.pkl\
+--kfold\
+--folds=10\
+--train_folds=8\
+--val_folds=1\
+--test_folds=1\
+--results_path=./Results\
+--epochs=100\
+--lrate=0.00001\
+--loss=mse\
+--es_min_delta=0.001\
+--es_patience=10\
+--es_monitor=val_loss\
+-vv\
+--wandb\
+--predictions\
+--save_model
+
+#### model.txt
+--hidden\
+256\
+128\
+64\
+--hidden_activation=elu\
+--output_activation=linear
