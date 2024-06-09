@@ -20,50 +20,33 @@ def load_cross_validation_results(results_path, rotations):
     return results
 
 
-def extract_mses(results, idx=0):
-    mses = np.empty(len(results))
-    worst = -np.infty
-    best = np.infty
+def extract_metric(results, idx):
+    metrics = np.empty(len(results))
     for i, result in enumerate(results):
-        mses[i] = result['test_eval'][idx]
-        if mses[i] < best:
-            best = mses[i]
-        if mses[i] > worst:
-            worst = mses[i]
-    return mses, best, worst, np.mean(mses)
-
-
-def extract_maes(results, idx=1):
-    maes = np.empty(len(results))
-    worst = -np.infty
-    best = np.infty
-    for i, result in enumerate(results):
-        maes[i] = result['test_eval'][idx]
-        if maes[i] < best:
-            best = maes[i]
-        if maes[i] > worst:
-            worst = maes[i]
-    return maes, best, worst, np.mean(maes)
-
-
-def extract_r2_scores(results, idx=2):
-    r2s = np.empty(len(results))
-    worst = np.infty
-    best = -np.infty
-    for i, result in enumerate(results):
-        r2s[i] = result['test_eval'][idx]
-        if r2s[i] > best:
-            best = r2s[i]
-        if r2s[i] < worst:
-            worst = r2s[i]
-    return r2s, best, worst, np.mean(r2s)
+        metrics[i] = result['test_eval'][idx]
+    return metrics
 
 
 def extract_metrics(results, mse_idx=0, mae_idx=1, r2_idx=2):
-    mses = extract_mses(results, idx=mse_idx)
-    maes = extract_maes(results, idx=mae_idx)
-    r2s = extract_r2_scores(results, idx=r2_idx)
+    mses = extract_metric(results, idx=mse_idx)
+    maes = extract_metric(results, idx=mae_idx)
+    r2s = extract_metric(results, idx=r2_idx)
     return mses, maes, r2s
+
+
+def perform_paired_ttest(sample1, sample2, confidence=0.95):
+    ttest = scipy.stats.ttest_rel(sample1, sample2)
+    print('Performing paired t-test')
+    print('Null hypothesis: Both samples come from the same distribution')
+    print(f'Difference in mean: {np.mean(sample1) - np.mean(sample2)}')
+    print(f'pvalue: {ttest.pvalue}')
+    print(f'Minimum confidence: {confidence}')
+    if (1 - confidence) > ttest.pvalue:
+        print('Decision: Reject null hypothesis')
+        print(f'We are at least {confidence * 100}% confident that the samples come from different distributions')
+    else:
+        print('Decision: Fail to reject null hypothesis')
+        print(f'We are NOT at least {confidence * 100}% confident that the samples come from different distributions')
 
 
 def make_residual_plot_total(results):
@@ -111,17 +94,15 @@ if __name__ == '__main__':
     intermediate_2_cv_results = load_cross_validation_results('../Results/intermediate_2_rotation_{}_layers_256_128_64_act_elu_lrate_1e-05_results.pkl', rotations)
     intermediate_2_cv_mses, intermediate_2_cv_maes, intermediate_2_cv_r2s = extract_metrics(intermediate_2_cv_results)
 
-    make_residual_plot_spread(intermediate_2_cv_results[0])
+    perform_paired_ttest(intermediate_cv_maes, intermediate_2_cv_maes, confidence=0.95)
+
+    # make_residual_plot_spread(intermediate_2_cv_results[0])
 
     # intermediate_no_splits_results = load_cross_validation_results('../Results/intermediate_no_splits_rotation_{}_128_64_32_act_elu_lrate_1e-05_results.pkl', rotations)
     # intermediate_no_splits_maes = extract_maes(intermediate_no_splits_results)
     #
     # simple_players_results = load_cross_validation_results('../Results/simple_players_rotation_{}_256_128_64_act_elu_lrate_1e-05_results.pkl', rotations)
     # simple_players_maes = extract_maes(simple_players_results)
-
-    # t_test = scipy.stats.ttest_rel(intermediate_2_cv_maes[0], intermediate_cv_maes[0])
-    # print(f'pvalue = {t_test.pvalue}')
-    # print(f'diff = {intermediate_2_cv_maes[3] - intermediate_cv_maes[3]}')
 
     # results = load_results('../Results/moderate_model_results.pkl')
     # x_test = results['x_test']
