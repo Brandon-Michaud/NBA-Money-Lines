@@ -13,24 +13,24 @@ def load_results(results_path):
         return results
 
 
-def load_cross_validation_results(results_path, rotations):
+def load_results_cv(results_path, rotations):
     results = []
     for rotation in rotations:
         results.append(load_results(results_path.format(rotation)))
     return results
 
 
-def extract_metric(results, idx):
+def extract_metric_cv(results, idx):
     metrics = np.empty(len(results))
     for i, result in enumerate(results):
         metrics[i] = result['test_eval'][idx]
     return metrics
 
 
-def extract_metrics(results, mse_idx=0, mae_idx=1, r2_idx=2):
-    mses = extract_metric(results, idx=mse_idx)
-    maes = extract_metric(results, idx=mae_idx)
-    r2s = extract_metric(results, idx=r2_idx)
+def extract_metrics_cv(results, mse_idx=0, mae_idx=1, r2_idx=2):
+    mses = extract_metric_cv(results, idx=mse_idx)
+    maes = extract_metric_cv(results, idx=mae_idx)
+    r2s = extract_metric_cv(results, idx=r2_idx)
     return mses, maes, r2s
 
 
@@ -49,12 +49,16 @@ def perform_paired_ttest(sample1, sample2, confidence=0.95):
         print(f'We are NOT at least {confidence * 100}% confident that the samples come from different distributions')
 
 
-def find_baseline_prediction(real_values):
-    avg_values = np.mean(real_values, axis=0)
-    avg_values_arr = np.full(real_values.shape, avg_values)
-    baseline_mae = mean_absolute_error(real_values, avg_values_arr)
-    baseline_mse = mean_squared_error(real_values, avg_values_arr)
-    return baseline_mse, baseline_mae
+def find_baseline_prediction_performances_cv(results):
+    baseline_mses = np.empty(len(results))
+    baseline_maes = np.empty(len(results))
+    for i, result in enumerate(results):
+        real_values = result['test_real']
+        avg_values = np.mean(real_values, axis=0)
+        avg_values_arr = np.full(real_values.shape, avg_values)
+        baseline_maes[i] = mean_absolute_error(real_values, avg_values_arr)
+        baseline_mses[i] = mean_squared_error(real_values, avg_values_arr)
+    return baseline_mses, baseline_maes
 
 
 def make_residual_plot_total(results):
@@ -90,20 +94,20 @@ def make_residual_plot_spread(results):
 if __name__ == '__main__':
     rotations = range(10)
 
-    simple_cv_results = load_cross_validation_results('../Results/simple_rotation_{}_layers_16_8_4_act_elu_lrate_1e-05_results.pkl', rotations)
-    simple_cv_mses, simple_cv_maes, simple_cv_r2s = extract_metrics(simple_cv_results)
+    simple_cv_results = load_results_cv('../Results/simple_rotation_{}_layers_16_8_4_act_elu_lrate_1e-05_results.pkl', rotations)
+    simple_cv_mses, simple_cv_maes, simple_cv_r2s = extract_metrics_cv(simple_cv_results)
 
-    moderate_cv_results = load_cross_validation_results('../Results/moderate_rotation_{}_layers_64_32_16_act_elu_lrate_1e-05_results.pkl', rotations)
-    moderate_cv_mses, moderate_cv_maes, moderate_cv_r2s = extract_metrics(moderate_cv_results)
+    moderate_cv_results = load_results_cv('../Results/moderate_rotation_{}_layers_64_32_16_act_elu_lrate_1e-05_results.pkl', rotations)
+    moderate_cv_mses, moderate_cv_maes, moderate_cv_r2s = extract_metrics_cv(moderate_cv_results)
 
-    intermediate_cv_results = load_cross_validation_results('../Results/intermediate_rotation_{}_layers_256_128_64_act_elu_lrate_1e-05_results.pkl', rotations)
-    intermediate_cv_mses, intermediate_cv_maes, intermediate_cv_r2s = extract_metrics(intermediate_cv_results)
+    intermediate_cv_results = load_results_cv('../Results/intermediate_rotation_{}_layers_256_128_64_act_elu_lrate_1e-05_results.pkl', rotations)
+    intermediate_cv_mses, intermediate_cv_maes, intermediate_cv_r2s = extract_metrics_cv(intermediate_cv_results)
 
-    intermediate_2_cv_results = load_cross_validation_results('../Results/intermediate_2_rotation_{}_layers_256_128_64_act_elu_lrate_1e-05_results.pkl', rotations)
-    intermediate_2_cv_mses, intermediate_2_cv_maes, intermediate_2_cv_r2s = extract_metrics(intermediate_2_cv_results)
+    intermediate_2_cv_results = load_results_cv('../Results/intermediate_2_rotation_{}_layers_256_128_64_act_elu_lrate_1e-05_results.pkl', rotations)
+    intermediate_2_cv_mses, intermediate_2_cv_maes, intermediate_2_cv_r2s = extract_metrics_cv(intermediate_2_cv_results)
 
     # perform_paired_ttest(intermediate_cv_maes, intermediate_2_cv_maes, confidence=0.95)
-    find_baseline_prediction(intermediate_2_cv_results[0]['test_real'])
+    intermediate_2_cv_baseline_mses, intermediate_2_cv_baseline_maes = find_baseline_prediction_performances_cv(intermediate_2_cv_results)
 
     # make_residual_plot_spread(intermediate_2_cv_results[0])
 
