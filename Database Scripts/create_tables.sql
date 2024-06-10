@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS PlayerStats;
 DROP TABLE IF EXISTS TeamStats;
+DROP TABLE IF EXISTS BettingLines;
 DROP TABLE IF EXISTS Games;
 DROP TABLE IF EXISTS Teams;
 DROP TABLE IF EXISTS Players;
@@ -107,4 +108,14 @@ CREATE TABLE PlayerStats (
     PRIMARY KEY (game_date, player_name),
     FOREIGN KEY (game_date, home_team_name, away_team_name) REFERENCES Games(game_date, home_team_name, away_team_name),
     FOREIGN KEY (player_name) REFERENCES Players(player_name)
+);
+
+CREATE TABLE BettingLines (
+    game_date DATE,
+    home_team_name VARCHAR(255),
+	away_team_name VARCHAR(255),
+	spread FLOAT,
+	total FLOAT,
+    PRIMARY KEY (game_date, home_team_name, away_team_name),
+    FOREIGN KEY (game_date, home_team_name, away_team_name) REFERENCES Games(game_date, home_team_name, away_team_name)
 );
