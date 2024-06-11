@@ -13,10 +13,14 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
                    include_home_away_splits=True, include_win_percentage=True, include_days_since_last_game=True,
                    include_player_stats=False, player_input_stats=None, player_count_per_team=18,
                    include_player_home_away_splits=True,
+                   include_betting_lines=False,
                    games=None):
     # Store the dataset in two lists
     inputs = []
     outputs = []
+
+    # Store betting lines
+    betting_lines = []
 
     # Create SQL strings for selecting desired stats
     input_stat_columns = ", ".join(input_stats)
@@ -29,7 +33,11 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
         player_avg_input_stat_columns = ", ".join([f"AVG({stat})" for stat in player_input_stats])
 
     # Get all the games
-    if games is None:
+    if games is None and include_betting_lines:
+        cursor.execute(all_games_with_stats_and_lines.format(home_stat_columns=output_home_stat_columns,
+                                                             away_stat_columns=output_away_stat_columns))
+        games = cursor.fetchall()
+    elif games is None:
         cursor.execute(all_games_with_stats.format(home_stat_columns=output_home_stat_columns,
                                                    away_stat_columns=output_away_stat_columns))
         games = cursor.fetchall()
@@ -45,7 +53,13 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
 
         # Get output stats for both teams
         home_team_stats = game[3:3 + len(output_stats)]
-        away_team_stats = game[3 + len(output_stats):]
+        away_team_stats = game[3 + len(output_stats):3 + 2 * len(output_stats)]
+
+        # Get betting lines
+        if include_betting_lines:
+            spread = game[3 + 2 * len(output_stats)]
+            total = game[3 + 2 * len(output_stats) + 1]
+            betting_lines.append((spread, total))
 
         # Store inputs and outputs for game
         x = []
@@ -197,6 +211,10 @@ def create_dataset(input_stats, output_stats, average_window, dataset_file_name,
 
     # Combine inputs and outputs
     dataset = [inputs, outputs]
+
+    # Add betting lines to dataset
+    if include_betting_lines:
+        dataset.append(betting_lines)
 
     # Save dataset to file
     with open(f'Datasets/{dataset_file_name}', 'wb') as fp:
@@ -383,10 +401,9 @@ if __name__ == '__main__':
     # create_dataset(intermediate_2_input_stats, output_stats, 10, 'intermediate_2_dataset.pkl', cursor,
     #                include_win_percentage=True, include_days_since_last_game=True, include_home_away_splits=True,
     #                include_player_stats=False)
-    create_dataset(advanced_input_stats, output_stats, 10, 'advanced_dataset.pkl', cursor,
+    create_dataset(intermediate_input_stats, output_stats, 10, 'betting_intermediate_dataset.pkl', cursor,
                    include_win_percentage=True, include_days_since_last_game=True, include_home_away_splits=True,
-                   include_player_stats=True, player_input_stats=advanced_player_input_stats, player_count_per_team=18,
-                   include_player_home_away_splits=False)
+                   include_player_stats=False, include_betting_lines=True)
 
     # Close the cursor and connection
     cursor.close()

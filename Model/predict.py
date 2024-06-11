@@ -24,4 +24,3 @@ def get_average_prediction(inputs, outputs, models):
 if __name__ == '__main__':
     models = load_saved_models('../Results/intermediate_rotation_{}_layers_256_128_64_act_elu_lrate_1e-05_model.keras', range(10))
     inputs, outputs = load_dataset('../Datasets/predictions_2024-06-09.pkl')
-    print(get_average_prediction(inputs, outputs, models))\

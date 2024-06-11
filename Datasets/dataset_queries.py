@@ -19,6 +19,26 @@ JOIN
     TeamStats away_stats ON Games.game_date = away_stats.game_date AND Games.away_team_name = away_stats.team_name;
 """
 
+# .format(home_stat_columns, away_stat_columns)
+all_games_with_stats_and_lines = """
+SELECT 
+    Games.game_date, 
+    Games.home_team_name, 
+    Games.away_team_name, 
+    {home_stat_columns},
+    {away_stat_columns},
+    BettingLines.spread,
+    BettingLines.total
+FROM 
+    BettingLines
+JOIN 
+    Games ON BettingLines.game_date = Games.game_date AND BettingLines.home_team_name = Games.home_team_name AND BettingLines.away_team_name = Games.away_team_name
+JOIN 
+    TeamStats home_stats ON Games.game_date = home_stats.game_date AND Games.home_team_name = home_stats.team_name
+JOIN 
+    TeamStats away_stats ON Games.game_date = away_stats.game_date AND Games.away_team_name = away_stats.team_name;
+"""
+
 # .format(stat_columns, aggregate_stat_columns)
 # parameters = (team_name, include_home_games, team_name, include_away_games, game_date, window, team_name)
 team_stat_per_game = """
@@ -38,21 +58,6 @@ TeamStatsLastXGames AS (
 )
 SELECT {aggregate_stat_columns}
 FROM TeamStatsLastXGames;
-"""
-
-# .format(stat_columns, aggregate_stat_columns)
-# parameters = (team_name, game_date, include_home_games, include_away_games, window)
-team_stat_per_game_alt = """
-SELECT {aggregate_stat_columns}
-FROM (
-    SELECT {stat_columns}
-    FROM TeamStats
-    WHERE team_name = %s
-    AND game_date < %s
-    AND ((home = TRUE AND %s) or (home = FALSE AND %s))
-    ORDER BY game_date DESC
-    LIMIT %s
-) as LastXGames
 """
 
 # .format(stat_columns, aggregate_stat_columns)
